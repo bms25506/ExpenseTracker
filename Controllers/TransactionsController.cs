@@ -16,14 +16,74 @@ public class TransactionsController : Controller
         _context = context;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(
+        string? searchTerm,
+        int? categoryId,
+        DateTime? startDate,
+        DateTime? endDate)
     {
-        var transactions = await _context.Transactions
+        var query = _context.Transactions
             .Include(transaction => transaction.Category)
+            .AsQueryable();
+
+        var invalidDateRange =
+            startDate.HasValue &&
+            endDate.HasValue &&
+            startDate.Value.Date > endDate.Value.Date;
+
+        if (invalidDateRange)
+        {
+            ModelState.AddModelError(
+                nameof(TransactionIndexViewModel.EndDate),
+                "End date must be on or after the start date.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var trimmedSearchTerm = searchTerm.Trim();
+
+            query = query.Where(transaction =>
+                transaction.Description.Contains(trimmedSearchTerm));
+        }
+
+        if (categoryId.HasValue)
+        {
+            query = query.Where(transaction =>
+                transaction.CategoryId == categoryId.Value);
+        }
+
+        if (!invalidDateRange && startDate.HasValue)
+        {
+            var start = startDate.Value.Date;
+
+            query = query.Where(transaction =>
+                transaction.Date >= start);
+        }
+
+        if (!invalidDateRange && endDate.HasValue)
+        {
+            var endExclusive = endDate.Value.Date.AddDays(1);
+
+            query = query.Where(transaction =>
+                transaction.Date < endExclusive);
+        }
+
+        var transactions = await query
             .OrderByDescending(transaction => transaction.Date)
+            .ThenByDescending(transaction => transaction.Id)
             .ToListAsync();
 
-        return View(transactions);
+        var viewModel = new TransactionIndexViewModel
+        {
+            SearchTerm = searchTerm?.Trim() ?? string.Empty,
+            CategoryId = categoryId,
+            StartDate = startDate,
+            EndDate = endDate,
+            Categories = await GetCategorySelectListAsync(),
+            Transactions = transactions
+        };
+
+        return View(viewModel);
     }
 
     [HttpGet]
