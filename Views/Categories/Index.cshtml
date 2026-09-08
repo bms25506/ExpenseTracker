@@ -1,0 +1,65 @@
+@model IEnumerable<ExpenseTracker.Models.Category>
+
+@{
+    ViewData["Title"] = "Categories";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Categories</h1>
+
+    <a asp-controller="Categories"
+       asp-action="Create"
+       class="btn btn-primary">
+        Create Category
+    </a>
+</div>
+
+@if (TempData["CategoryDeleteError"] is string errorMessage)
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <p>No categories have been added yet.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var category in Model)
+            {
+                <tr>
+                    <td>@category.Name</td>
+                    <td>@category.Type</td>
+
+                    <td>
+                        <a asp-controller="Categories"
+                           asp-action="Edit"
+                           asp-route-id="@category.Id"
+                           class="btn btn-sm btn-outline-primary">
+                            Edit
+                        </a>
+
+                        <a asp-controller="Categories"
+                           asp-action="Delete"
+                           asp-route-id="@category.Id"
+                           class="btn btn-sm btn-outline-danger">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -1,0 +1,66 @@
+@model IEnumerable<ExpenseTracker.Models.Transaction>
+
+@{
+    ViewData["Title"] = "Transactions";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Transactions</h1>
+
+    <a asp-controller="Transactions"
+       asp-action="Create"
+       class="btn btn-primary">
+        Add Transaction
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <p>No transactions have been added yet.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Type</th>
+                <th class="text-end">Amount</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var transaction in Model)
+            {
+                <tr>
+                    <td>@transaction.Date.ToString("MM/dd/yyyy")</td>
+                    <td>@transaction.Description</td>
+                    <td>@transaction.Category?.Name</td>
+                    <td>@transaction.Category?.Type</td>
+                    <td class="text-end">
+                        @transaction.Amount.ToString("C")
+                    </td>
+
+                    <td>
+                        <a asp-controller="Transactions"
+                           asp-action="Edit"
+                           asp-route-id="@transaction.Id"
+                           class="btn btn-sm btn-outline-primary">
+                            Edit
+                        </a>
+
+                        <a asp-controller="Transactions"
+                           asp-action="Delete"
+                           asp-route-id="@transaction.Id"
+                           class="btn btn-sm btn-outline-danger">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
