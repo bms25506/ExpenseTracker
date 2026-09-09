@@ -20,8 +20,16 @@ public class TransactionsController : Controller
         string? searchTerm,
         int? categoryId,
         DateTime? startDate,
-        DateTime? endDate)
+        DateTime? endDate,
+        int page = 1)
     {
+        const int pageSize = 10;
+
+        if (page < 1)
+        {
+            page = 1;
+        }
+
         var query = _context.Transactions
             .AsQueryable();
 
@@ -79,10 +87,22 @@ public class TransactionsController : Controller
                 transaction.Category.Type == "Expense")
             .SumAsync(transaction => transaction.Amount);
 
+        var totalItems = await query.CountAsync();
+
+        var totalPages = (int)Math.Ceiling(
+            totalItems / (double)pageSize);
+
+        if (totalPages > 0 && page > totalPages)
+        {
+            page = totalPages;
+        }
+
         var transactions = await query
             .Include(transaction => transaction.Category)
             .OrderByDescending(transaction => transaction.Date)
             .ThenByDescending(transaction => transaction.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
         var viewModel = new TransactionIndexViewModel
@@ -94,6 +114,10 @@ public class TransactionsController : Controller
             TotalIncome = totalIncome,
             TotalExpenses = totalExpenses,
             Balance = totalIncome - totalExpenses,
+            CurrentPage = page,
+            PageSize = pageSize,
+            TotalItems = totalItems,
+            TotalPages = totalPages,
             Categories = await GetCategorySelectListAsync(),
             Transactions = transactions
         };
