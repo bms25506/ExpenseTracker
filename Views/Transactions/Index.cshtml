@@ -8,6 +8,11 @@
         Model.CategoryId.HasValue ||
         Model.StartDate.HasValue ||
         Model.EndDate.HasValue;
+
+    var balanceTextClass =
+        Model.Balance >= 0
+            ? "text-success"
+            : "text-danger";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -18,6 +23,44 @@
        class="btn btn-primary">
         Add Transaction
     </a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Filtered Income</h5>
+
+                <p class="card-text fs-3 text-success mb-0">
+                    @Model.TotalIncome.ToString("C")
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Filtered Expenses</h5>
+
+                <p class="card-text fs-3 text-danger mb-0">
+                    @Model.TotalExpenses.ToString("C")
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Filtered Balance</h5>
+
+                <p class="card-text fs-3 @balanceTextClass mb-0">
+                    @Model.Balance.ToString("C")
+                </p>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="card mb-4">

@@ -16,6 +16,12 @@ public class TransactionIndexViewModel
     [DataType(DataType.Date)]
     public DateTime? EndDate {get;set;}
 
+    public decimal TotalIncome {get;set;}
+
+    public decimal TotalExpenses {get;set;}
+
+    public decimal Balance {get;set;}
+
     public List<SelectListItem> Categories {get;set;} = new();
 
     public List<Transaction> Transactions {get;set;} = new();

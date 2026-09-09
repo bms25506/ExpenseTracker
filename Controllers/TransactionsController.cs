@@ -23,7 +23,6 @@ public class TransactionsController : Controller
         DateTime? endDate)
     {
         var query = _context.Transactions
-            .Include(transaction => transaction.Category)
             .AsQueryable();
 
         var invalidDateRange =
@@ -68,7 +67,20 @@ public class TransactionsController : Controller
                 transaction.Date < endExclusive);
         }
 
+        var totalIncome = await query
+            .Where(transaction =>
+                transaction.Category != null &&
+                transaction.Category.Type == "Income")
+            .SumAsync(transaction => transaction.Amount);
+
+        var totalExpenses = await query
+            .Where(transaction =>
+                transaction.Category != null &&
+                transaction.Category.Type == "Expense")
+            .SumAsync(transaction => transaction.Amount);
+
         var transactions = await query
+            .Include(transaction => transaction.Category)
             .OrderByDescending(transaction => transaction.Date)
             .ThenByDescending(transaction => transaction.Id)
             .ToListAsync();
@@ -79,6 +91,9 @@ public class TransactionsController : Controller
             CategoryId = categoryId,
             StartDate = startDate,
             EndDate = endDate,
+            TotalIncome = totalIncome,
+            TotalExpenses = totalExpenses,
+            Balance = totalIncome - totalExpenses,
             Categories = await GetCategorySelectListAsync(),
             Transactions = transactions
         };
