@@ -30,6 +30,30 @@
     var endPage = Math.Min(
         Model.TotalPages,
         Model.CurrentPage + 2);
+
+    var dateSortDirection =
+        Model.SortBy == "date" &&
+        Model.SortDirection == "asc"
+            ? "desc"
+            : "asc";
+
+    var descriptionSortDirection =
+        Model.SortBy == "description" &&
+        Model.SortDirection == "asc"
+            ? "desc"
+            : "asc";
+
+    var categorySortDirection =
+        Model.SortBy == "category" &&
+        Model.SortDirection == "asc"
+            ? "desc"
+            : "asc";
+
+    var amountSortDirection =
+        Model.SortBy == "amount" &&
+        Model.SortDirection == "asc"
+            ? "desc"
+            : "asc";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -47,7 +71,6 @@
         <div class="card h-100">
             <div class="card-body">
                 <h5 class="card-title">Filtered Income</h5>
-
                 <p class="card-text fs-3 text-success mb-0">
                     @Model.TotalIncome.ToString("C")
                 </p>
@@ -59,7 +82,6 @@
         <div class="card h-100">
             <div class="card-body">
                 <h5 class="card-title">Filtered Expenses</h5>
-
                 <p class="card-text fs-3 text-danger mb-0">
                     @Model.TotalExpenses.ToString("C")
                 </p>
@@ -71,7 +93,6 @@
         <div class="card h-100">
             <div class="card-body">
                 <h5 class="card-title">Filtered Balance</h5>
-
                 <p class="card-text fs-3 @balanceTextClass mb-0">
                     @Model.Balance.ToString("C")
                 </p>
@@ -88,10 +109,17 @@
               asp-action="Index"
               method="get">
 
+            <input type="hidden"
+                   name="sortBy"
+                   value="@Model.SortBy" />
+
+            <input type="hidden"
+                   name="sortDirection"
+                   value="@Model.SortDirection" />
+
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label asp-for="SearchTerm"
-                           class="form-label">
+                    <label asp-for="SearchTerm" class="form-label">
                         Description
                     </label>
 
@@ -101,8 +129,7 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label asp-for="CategoryId"
-                           class="form-label">
+                    <label asp-for="CategoryId" class="form-label">
                         Category
                     </label>
 
@@ -114,8 +141,7 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label asp-for="StartDate"
-                           class="form-label">
+                    <label asp-for="StartDate" class="form-label">
                         Start Date
                     </label>
 
@@ -124,8 +150,7 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label asp-for="EndDate"
-                           class="form-label">
+                    <label asp-for="EndDate" class="form-label">
                         End Date
                     </label>
 
@@ -139,8 +164,7 @@
             </div>
 
             <div class="mt-3">
-                <button type="submit"
-                        class="btn btn-primary">
+                <button type="submit" class="btn btn-primary">
                     Apply Filters
                 </button>
 
@@ -185,11 +209,96 @@ else
         <table class="table align-middle">
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Description</th>
-                    <th>Category</th>
+                    <th>
+                        <a asp-controller="Transactions"
+                           asp-action="Index"
+                           asp-route-sortBy="date"
+                           asp-route-sortDirection="@dateSortDirection"
+                           asp-route-searchTerm="@Model.SearchTerm"
+                           asp-route-categoryId="@Model.CategoryId"
+                           asp-route-startDate="@Model.StartDate?.ToString("yyyy-MM-dd")"
+                           asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-dd")"
+                           class="text-decoration-none text-dark">
+
+                            Date
+
+                            @if (Model.SortBy == "date")
+                            {
+                                <span aria-hidden="true">
+                                    @(Model.SortDirection == "asc" ? "▲" : "▼")
+                                </span>
+                            }
+                        </a>
+                    </th>
+
+                    <th>
+                        <a asp-controller="Transactions"
+                           asp-action="Index"
+                           asp-route-sortBy="description"
+                           asp-route-sortDirection="@descriptionSortDirection"
+                           asp-route-searchTerm="@Model.SearchTerm"
+                           asp-route-categoryId="@Model.CategoryId"
+                           asp-route-startDate="@Model.StartDate?.ToString("yyyy-MM-dd")"
+                           asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-dd")"
+                           class="text-decoration-none text-dark">
+
+                            Description
+
+                            @if (Model.SortBy == "description")
+                            {
+                                <span aria-hidden="true">
+                                    @(Model.SortDirection == "asc" ? "▲" : "▼")
+                                </span>
+                            }
+                        </a>
+                    </th>
+
+                    <th>
+                        <a asp-controller="Transactions"
+                           asp-action="Index"
+                           asp-route-sortBy="category"
+                           asp-route-sortDirection="@categorySortDirection"
+                           asp-route-searchTerm="@Model.SearchTerm"
+                           asp-route-categoryId="@Model.CategoryId"
+                           asp-route-startDate="@Model.StartDate?.ToString("yyyy-MM-dd")"
+                           asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-dd")"
+                           class="text-decoration-none text-dark">
+
+                            Category
+
+                            @if (Model.SortBy == "category")
+                            {
+                                <span aria-hidden="true">
+                                    @(Model.SortDirection == "asc" ? "▲" : "▼")
+                                </span>
+                            }
+                        </a>
+                    </th>
+
                     <th>Type</th>
-                    <th class="text-end">Amount</th>
+
+                    <th class="text-end">
+                        <a asp-controller="Transactions"
+                           asp-action="Index"
+                           asp-route-sortBy="amount"
+                           asp-route-sortDirection="@amountSortDirection"
+                           asp-route-searchTerm="@Model.SearchTerm"
+                           asp-route-categoryId="@Model.CategoryId"
+                           asp-route-startDate="@Model.StartDate?.ToString("yyyy-MM-dd")"
+                           asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-dd")"
+                           class="text-decoration-none text-dark">
+
+                            Amount
+
+                            @if (Model.SortBy == "amount")
+                            {
+                                <span aria-hidden="true">
+                                    @(Model.SortDirection == "asc" ? "▲" : "▼")
+                                </span>
+                            }
+                        </a>
+                    </th>
+
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -198,21 +307,13 @@ else
                 @foreach (var transaction in Model.Transactions)
                 {
                     <tr>
-                        <td>
-                            @transaction.Date.ToString("MM/dd/yyyy")
-                        </td>
+                        <td>@transaction.Date.ToString("MM/dd/yyyy")</td>
 
-                        <td>
-                            @transaction.Description
-                        </td>
+                        <td>@transaction.Description</td>
 
-                        <td>
-                            @transaction.Category?.Name
-                        </td>
+                        <td>@transaction.Category?.Name</td>
 
-                        <td>
-                            @transaction.Category?.Type
-                        </td>
+                        <td>@transaction.Category?.Type</td>
 
                         <td class="text-end">
                             @transaction.Amount.ToString("C")
@@ -252,7 +353,9 @@ else
                        asp-route-searchTerm="@Model.SearchTerm"
                        asp-route-categoryId="@Model.CategoryId"
                        asp-route-startDate="@Model.StartDate?.ToString("yyyy-MM-dd")"
-                       asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-dd")">
+                       asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-dd")"
+                       asp-route-sortBy="@Model.SortBy"
+                       asp-route-sortDirection="@Model.SortDirection">
                         Previous
                     </a>
                 </li>
@@ -269,7 +372,9 @@ else
                            asp-route-searchTerm="@Model.SearchTerm"
                            asp-route-categoryId="@Model.CategoryId"
                            asp-route-startDate="@Model.StartDate?.ToString("yyyy-MM-dd")"
-                           asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-dd")">
+                           asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-dd")"
+                           asp-route-sortBy="@Model.SortBy"
+                           asp-route-sortDirection="@Model.SortDirection">
                             @pageNumber
                         </a>
                     </li>
@@ -283,7 +388,9 @@ else
                        asp-route-searchTerm="@Model.SearchTerm"
                        asp-route-categoryId="@Model.CategoryId"
                        asp-route-startDate="@Model.StartDate?.ToString("yyyy-MM-dd")"
-                       asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-dd")">
+                       asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-dd")"
+                       asp-route-sortBy="@Model.SortBy"
+                       asp-route-sortDirection="@Model.SortDirection">
                         Next
                     </a>
                 </li>

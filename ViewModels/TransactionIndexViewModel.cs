@@ -16,6 +16,10 @@ public class TransactionIndexViewModel
     [DataType(DataType.Date)]
     public DateTime? EndDate {get;set;}
 
+    public string SortBy {get;set;} = "date";
+
+    public string SortDirection {get;set;} = "desc";
+
     public decimal TotalIncome {get;set;}
 
     public decimal TotalExpenses {get;set;}

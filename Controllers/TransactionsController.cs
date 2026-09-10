@@ -21,6 +21,8 @@ public class TransactionsController : Controller
         int? categoryId,
         DateTime? startDate,
         DateTime? endDate,
+        string? sortBy,
+        string? sortDirection,
         int page = 1)
     {
         const int pageSize = 10;
@@ -28,6 +30,24 @@ public class TransactionsController : Controller
         if (page < 1)
         {
             page = 1;
+        }
+
+        sortBy = sortBy?.Trim().ToLowerInvariant() ?? "date";
+        sortDirection =
+            sortDirection?.Trim().ToLowerInvariant() ?? "desc";
+
+        if (sortBy is not (
+            "date" or
+            "description" or
+            "category" or
+            "amount"))
+        {
+            sortBy = "date";
+        }
+
+        if (sortDirection is not ("asc" or "desc"))
+        {
+            sortDirection = "desc";
         }
 
         var query = _context.Transactions
@@ -97,10 +117,59 @@ public class TransactionsController : Controller
             page = totalPages;
         }
 
-        var transactions = await query
-            .Include(transaction => transaction.Category)
-            .OrderByDescending(transaction => transaction.Date)
-            .ThenByDescending(transaction => transaction.Id)
+        var displayQuery = query
+            .Include(transaction => transaction.Category);
+
+        IOrderedQueryable<Transaction> orderedQuery;
+
+        switch (sortBy)
+        {
+            case "description":
+                orderedQuery = sortDirection == "asc"
+                    ? displayQuery
+                        .OrderBy(transaction => transaction.Description)
+                        .ThenBy(transaction => transaction.Id)
+                    : displayQuery
+                        .OrderByDescending(
+                            transaction => transaction.Description)
+                        .ThenByDescending(transaction => transaction.Id);
+                break;
+
+            case "category":
+                orderedQuery = sortDirection == "asc"
+                    ? displayQuery
+                        .OrderBy(transaction =>
+                            transaction.Category!.Name)
+                        .ThenBy(transaction => transaction.Id)
+                    : displayQuery
+                        .OrderByDescending(transaction =>
+                            transaction.Category!.Name)
+                        .ThenByDescending(transaction => transaction.Id);
+                break;
+
+            case "amount":
+                orderedQuery = sortDirection == "asc"
+                    ? displayQuery
+                        .OrderBy(transaction => transaction.Amount)
+                        .ThenBy(transaction => transaction.Id)
+                    : displayQuery
+                        .OrderByDescending(
+                            transaction => transaction.Amount)
+                        .ThenByDescending(transaction => transaction.Id);
+                break;
+
+            default:
+                orderedQuery = sortDirection == "asc"
+                    ? displayQuery
+                        .OrderBy(transaction => transaction.Date)
+                        .ThenBy(transaction => transaction.Id)
+                    : displayQuery
+                        .OrderByDescending(transaction => transaction.Date)
+                        .ThenByDescending(transaction => transaction.Id);
+                break;
+        }
+
+        var transactions = await orderedQuery
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -111,6 +180,8 @@ public class TransactionsController : Controller
             CategoryId = categoryId,
             StartDate = startDate,
             EndDate = endDate,
+            SortBy = sortBy,
+            SortDirection = sortDirection,
             TotalIncome = totalIncome,
             TotalExpenses = totalExpenses,
             Balance = totalIncome - totalExpenses,
