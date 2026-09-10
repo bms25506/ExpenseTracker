@@ -5,6 +5,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseAppHost>false</UseAppHost>
+
+    <DefaultItemExcludes>
+      $(DefaultItemExcludes);ExpenseTracker.Tests/**
+    </DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>
